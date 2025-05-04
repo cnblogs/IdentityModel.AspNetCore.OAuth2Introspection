@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using Duende.IdentityModel.Client;
+using IdentityModel.AspNetCore.OAuth2Introspection.Infrastructure;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using IdentityModel.AspNetCore.OAuth2Introspection.Infrastructure;
-using IdentityModel.Client;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Options;
 
 namespace IdentityModel.AspNetCore.OAuth2Introspection
 {
@@ -30,7 +30,7 @@ namespace IdentityModel.AspNetCore.OAuth2Introspection
             {
                 throw new ArgumentException("Caching is enabled, but no IDistributedCache is found in the services collection", nameof(_cache));
             }
-            
+
             options.IntrospectionClient = new AsyncLazy<HttpClient>(() => InitializeIntrospectionClient(options));
         }
 
@@ -53,7 +53,7 @@ namespace IdentityModel.AspNetCore.OAuth2Introspection
                 Address = options.Authority,
                 Policy = options?.DiscoveryPolicy ?? new DiscoveryPolicy()
             }).ConfigureAwait(false);
-            
+
             if (disco.IsError)
             {
                 switch (disco.ErrorType)

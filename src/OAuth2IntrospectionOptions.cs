@@ -1,8 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
 using IdentityModel.AspNetCore.OAuth2Introspection.Infrastructure;
-using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -116,7 +117,7 @@ namespace IdentityModel.AspNetCore.OAuth2Introspection
         /// <summary>
         /// Specifies the method how to generate the cache key from the token
         /// </summary>
-        public Func<OAuth2IntrospectionOptions,string, string> CacheKeyGenerator { get; set; } = CacheUtils.CacheKeyFromToken();
+        public Func<OAuth2IntrospectionOptions, string, string> CacheKeyGenerator { get; set; } = CacheUtils.CacheKeyFromToken();
 
         /// <summary>
         /// Specifies the method how to retrieve the token from the HTTP request
@@ -133,7 +134,7 @@ namespace IdentityModel.AspNetCore.OAuth2Introspection
         }
 
         internal AsyncLazy<HttpClient> IntrospectionClient { get; set; }
-        
+
         /// <summary>
         /// Check that the options are valid. Should throw an exception if things are not ok.
         /// </summary>
