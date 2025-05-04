@@ -33,8 +33,3 @@ jobs:
       run: ./build.sh
     - if: matrix.runs-on == 'windows-latest' && github.ref != 'refs/heads/main' && !contains(github.ref, 'refs/tags/')
       run: ./build.cmd
-    - if: (matrix.runs-on == 'windows-latest') && (github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/'))
-      env:
-        SignClientSecret: ${{ secrets.SIGNCLIENTSECRET }}
-      run: |
-        ./build.cmd sign
