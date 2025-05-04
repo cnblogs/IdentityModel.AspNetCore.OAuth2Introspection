@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using Duende.IdentityModel;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System;
@@ -19,20 +20,20 @@ namespace IdentityModel.AspNetCore.OAuth2Introspection
         private static readonly JsonSerializerOptions Options;
 
         static CacheExtensions()
-        {    
+        {
             Options = new JsonSerializerOptions
             {
                 IgnoreReadOnlyFields = true,
                 IgnoreReadOnlyProperties = true,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             };
-   
+
             Options.Converters.Add(new ClaimConverter());
         }
 
         public static async Task<IEnumerable<Claim>> GetClaimsAsync(this IDistributedCache cache, OAuth2IntrospectionOptions options, string token)
         {
-            var cacheKey = options.CacheKeyGenerator(options,token);
+            var cacheKey = options.CacheKeyGenerator(options, token);
             var bytes = await cache.GetAsync(cacheKey).ConfigureAwait(false);
 
             if (bytes == null)
