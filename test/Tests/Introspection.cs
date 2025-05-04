@@ -20,7 +20,6 @@ namespace Tests
 {
     public class Introspection
     {
-
         private static readonly string clientId = "client";
         private static readonly string clientSecret = "secret";
 

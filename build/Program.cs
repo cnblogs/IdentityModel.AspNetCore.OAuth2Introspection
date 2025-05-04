@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
@@ -22,7 +23,7 @@ namespace build
             public const string SignPackage = "sign-package";
         }
 
-        internal static void Main(string[] args)
+        internal static async Task Main(string[] args)
         {
             Target(Targets.RestoreTools, () =>
             {
@@ -34,12 +35,12 @@ namespace build
                 Run("dotnet", "clean -c Release -v m --nologo");
             });
 
-            Target(Targets.Build, DependsOn(Targets.CleanBuildOutput), () =>
+            Target(Targets.Build, dependsOn: [Targets.CleanBuildOutput], () =>
             {
                 Run("dotnet", "build -c Release --nologo");
             });
 
-            Target(Targets.Test, DependsOn(Targets.Build), () =>
+            Target(Targets.Test, dependsOn: [Targets.Build], () =>
             {
                 Run("dotnet", "test -c Release --no-build --nologo");
             });
@@ -52,21 +53,21 @@ namespace build
                 }
             });
 
-            Target(Targets.Pack, DependsOn(Targets.Build, Targets.CleanPackOutput), () =>
+            Target(Targets.Pack, dependsOn: [Targets.Build, Targets.CleanPackOutput], () =>
             {
                 Run("dotnet", $"pack ./src/IdentityModel.AspNetCore.OAuth2Introspection.csproj -c Release -o {Directory.CreateDirectory(packOutput).FullName} --no-build --nologo");
             });
 
-            Target(Targets.SignPackage, DependsOn(Targets.Pack, Targets.RestoreTools), () =>
+            Target(Targets.SignPackage, dependsOn: [Targets.Pack, Targets.RestoreTools], () =>
             {
                 SignNuGet();
             });
 
-            Target("default", DependsOn(Targets.Test, Targets.Pack));
+            Target("default", dependsOn: [Targets.Test, Targets.Pack]);
 
-            Target("sign", DependsOn(Targets.Test, Targets.SignPackage));
+            Target("sign", dependsOn: [Targets.Test, Targets.SignPackage]);
 
-            RunTargetsAndExit(args, ex => ex is SimpleExec.NonZeroExitCodeException || ex.Message.EndsWith(envVarMissing));
+            await RunTargetsAndExitAsync(args, ex => ex is SimpleExec.ExitCodeException || ex.Message.EndsWith(envVarMissing));
         }
 
         private static void SignNuGet()
@@ -92,7 +93,7 @@ namespace build
                         "--azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 " +
                         $"--azure-key-vault-client-secret {signClientSecret} " +
                         "--azure-key-vault-certificate CodeSigning"
-                        ,noEcho: true);
+                        , noEcho: true);
             }
         }
     }

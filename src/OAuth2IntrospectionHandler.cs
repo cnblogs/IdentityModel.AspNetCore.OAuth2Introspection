@@ -1,6 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,12 +14,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace IdentityModel.AspNetCore.OAuth2Introspection
 {
@@ -33,16 +33,14 @@ namespace IdentityModel.AspNetCore.OAuth2Introspection
         /// </summary>
         /// <param name="options">The options.</param>
         /// <param name="urlEncoder">The URL encoder.</param>
-        /// <param name="clock">The clock.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="cache">The cache.</param>
         public OAuth2IntrospectionHandler(
             IOptionsMonitor<OAuth2IntrospectionOptions> options,
             UrlEncoder urlEncoder,
-            ISystemClock clock,
             ILoggerFactory loggerFactory,
             IDistributedCache cache = null)
-            : base(options, loggerFactory, urlEncoder, clock)
+            : base(options, loggerFactory, urlEncoder)
         {
             _logger = loggerFactory.CreateLogger<OAuth2IntrospectionHandler>();
             _cache = cache;
@@ -154,10 +152,10 @@ namespace IdentityModel.AspNetCore.OAuth2Introspection
         }
 
         private static async Task<AuthenticateResult> ReportNonSuccessAndReturn(
-            string error, 
-            HttpContext httpContext, 
-            AuthenticationScheme scheme, 
-            OAuth2IntrospectionEvents events, 
+            string error,
+            HttpContext httpContext,
+            AuthenticationScheme scheme,
+            OAuth2IntrospectionEvents events,
             OAuth2IntrospectionOptions options)
         {
             var authenticationFailedContext = new AuthenticationFailedContext(httpContext, scheme, options)
@@ -171,11 +169,11 @@ namespace IdentityModel.AspNetCore.OAuth2Introspection
         }
 
         private static async Task<TokenIntrospectionResponse> LoadClaimsForToken(
-	        string token, 
-	        HttpContext context, 
-	        AuthenticationScheme scheme, 
-	        OAuth2IntrospectionEvents events, 
-	        OAuth2IntrospectionOptions options)
+            string token,
+            HttpContext context,
+            AuthenticationScheme scheme,
+            OAuth2IntrospectionEvents events,
+            OAuth2IntrospectionOptions options)
         {
             var introspectionClient = await options.IntrospectionClient.Value.ConfigureAwait(false);
             using var request = CreateTokenIntrospectionRequest(token, context, scheme, events, options);
@@ -191,10 +189,10 @@ namespace IdentityModel.AspNetCore.OAuth2Introspection
         }
 
         private static TokenIntrospectionRequest CreateTokenIntrospectionRequest(
-	        string token,
-	        HttpContext context,
-	        AuthenticationScheme scheme,
-	        OAuth2IntrospectionEvents events,
+            string token,
+            HttpContext context,
+            AuthenticationScheme scheme,
+            OAuth2IntrospectionEvents events,
             OAuth2IntrospectionOptions options)
         {
             if (options.ClientSecret == null && options.ClientAssertionExpirationTime <= DateTime.UtcNow)
@@ -231,10 +229,10 @@ namespace IdentityModel.AspNetCore.OAuth2Introspection
         }
 
         private static async Task<AuthenticateResult> CreateTicket(
-            IEnumerable<Claim> claims, 
-            string token, 
-            HttpContext httpContext, 
-            AuthenticationScheme scheme, 
+            IEnumerable<Claim> claims,
+            string token,
+            HttpContext httpContext,
+            AuthenticationScheme scheme,
             OAuth2IntrospectionEvents events,
             OAuth2IntrospectionOptions options)
         {
